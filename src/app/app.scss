@@ -1,0 +1,21 @@
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  margin: 0; // remove margens externas
+  padding: 0; // remove padding do container
+
+  // Menu lateral fixo
+  app-lateral-menu {
+    flex: 0 0 260px; // largura fixa
+    height: 100%;
+  }
+
+  // Conteúdo principal
+  .app-content {
+    flex: 1;
+    margin: 0; // remove margens
+    padding: 18px; // remove padding
+    overflow-y: auto;
+  }
+}

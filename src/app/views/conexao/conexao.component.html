@@ -1,0 +1,26 @@
+<form [formGroup]="conectarFormGroup">
+  <label>Nome da Instância</label>
+
+  <input
+    formControlName="nomeInstancia"
+    type="text"
+    placeholder="somente letras minúsculas"
+    (input)="filtrarLetrasMinusculas($event)"
+  />
+  <label class="information-small">
+    Somente letras minúsculas. Números, caracteres especiais e letras maiúsculas não são permitidos.
+  </label>
+
+  <div *ngIf="qrCodeUrl" style="text-align: center">
+    <img [src]="qrCodeUrl" />
+    <p>QR code expira em {{ segundosRestantes }} segundos</p>
+  </div>
+
+  <button type="button" *ngIf="qrCodeUrl == null && gerarNovoQrCode == false" (click)="conectar()">
+    Criar Instância
+  </button>
+
+  <button type="button" *ngIf="!qrCodeUrl && gerarNovoQrCode == true" (click)="conectar()">
+    Gerar novo QrCode
+  </button>
+</form>

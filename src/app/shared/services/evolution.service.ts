@@ -9,6 +9,8 @@ export class EvolutionService {
   private urlCreateInstance =
     'https://evolution-n8n.luvtff.easypanel.host/webhook/13770b81-57fe-4ae6-ae80-f06730408ea7';
 
+  private urlNewQrCode = 'https://evolution-n8n.luvtff.easypanel.host/webhook/atualizar-qr-code';
+
   constructor(private http: HttpClient) {}
 
   createInstance(instanceName: string): Observable<Blob> {
@@ -21,6 +23,21 @@ export class EvolutionService {
     });
 
     return this.http.post(this.urlCreateInstance, data, {
+      headers: headers,
+      responseType: 'blob',
+    });
+  }
+
+  newQrCode(instanceName: string): Observable<Blob> {
+    const data = {
+      instanceName: instanceName,
+    };
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    return this.http.post(this.urlNewQrCode, data, {
       headers: headers,
       responseType: 'blob',
     });

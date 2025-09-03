@@ -68,6 +68,35 @@ export class ConexaoComponent {
     });
   }
 
+  newQrCode() {
+    if (!this.conectarFormGroup.valid) {
+      this.mensagemErro = 'Nome da instância é obrigatório e deve conter apenas letras minúsculas';
+      return;
+    }
+
+    this.loading = true;
+    this.qrCodeUrl = null;
+    this.mensagemErro = null;
+    this.mensagemSucesso = null;
+
+    const instanceName = this.conectarFormGroup.value.nomeInstancia;
+
+    this.evolutionService.newQrCode(instanceName).subscribe({
+      next: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        this.qrCodeUrl = url;
+        this.cdr.detectChanges();
+
+        // Inicia o timer visível de 30 segundos
+        this.startQrCodeTimer(30);
+      },
+      error: (err) => {
+        console.error(err);
+        this.loading = false;
+      },
+    });
+  }
+
   private startQrCodeTimer(segundos: number) {
     // Cancela qualquer timer existente
     if (this.timerSubscription) {

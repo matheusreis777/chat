@@ -1,0 +1,34 @@
+@if (loading$ | async) {
+<div class="block-ui-overlay">
+  <!-- Spinner Circular -->
+  @if (spinnerType === 'circle') {
+  <div class="spinner-circle"></div>
+  }
+
+  <!-- Bouncing Dots -->
+  @if (spinnerType === 'dots') {
+  <div class="spinner-dots">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  }
+
+  <!-- SpinKit Chase -->
+  @if (spinnerType === 'chase') {
+  <div class="sk-chase">
+    <div class="sk-chase-dot"></div>
+    <div class="sk-chase-dot"></div>
+    <div class="sk-chase-dot"></div>
+    <div class="sk-chase-dot"></div>
+    <div class="sk-chase-dot"></div>
+    <div class="sk-chase-dot"></div>
+  </div>
+  }
+
+  <!-- Pulse Circle -->
+  @if (spinnerType === 'pulse') {
+  <div class="spinner-pulse"></div>
+  }
+</div>
+}

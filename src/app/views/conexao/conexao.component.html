@@ -1,26 +1,36 @@
 <form [formGroup]="conectarFormGroup">
   <label>Nome da Instância</label>
-
   <input
     formControlName="nomeInstancia"
     type="text"
-    placeholder="somente letras minúsculas"
-    (input)="filtrarLetrasMinusculas($event)"
+    placeholder="somente números"
+    (input)="filtrarApenasNumeros($event)"
   />
   <label class="information-small">
-    Somente letras minúsculas. Números, caracteres especiais e letras maiúsculas não são permitidos.
+    Somente números. Letras e caracteres especiais não são permitidos.
   </label>
 
   <div *ngIf="qrCodeUrl" style="text-align: center">
-    <img [src]="qrCodeUrl" />
-    <p>QR code expira em {{ segundosRestantes }} segundos</p>
+    <img [src]="qrCodeUrl" alt="QR Code para conexão" />
   </div>
 
-  <button type="button" *ngIf="qrCodeUrl == null && gerarNovoQrCode == false" (click)="conectar()">
-    Criar Instância
-  </button>
+  <div class="button-container">
+    <button
+      type="button"
+      *ngIf="qrCodeUrl == null && gerarNovoQrCode == false"
+      (click)="conectar()"
+      [disabled]="!conectarFormGroup.valid || isCreatingInstance"
+    >
+      {{ isCreatingInstance ? 'Criando...' : 'Criar Instância' }}
+    </button>
 
-  <button type="button" *ngIf="!qrCodeUrl && gerarNovoQrCode == true" (click)="newQrCode()">
-    Gerar novo QrCode
-  </button>
+    <button
+      type="button"
+      *ngIf="!qrCodeUrl && gerarNovoQrCode == true"
+      (click)="newQrCode()"
+      [disabled]="!conectarFormGroup.valid || isCreatingInstance"
+    >
+      {{ isCreatingInstance ? 'Gerando...' : 'Gerar novo QR Code' }}
+    </button>
+  </div>
 </form>

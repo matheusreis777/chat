@@ -11,7 +11,8 @@
   </label>
 
   <div *ngIf="qrCodeUrl" style="text-align: center">
-    <img [src]="qrCodeUrl" alt="QR Code para conexão" />
+    <img [src]="qrCodeUrl" />
+    <p>QR code expira em {{ segundosRestantes }} segundos</p>
   </div>
 
   <div class="button-container">

@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
-import { ChatComponent } from './views/chat/chat';
-import { HomeComponent } from './views/home/home.component';
-import { ConexaoComponent } from './views/conexao/conexao.component';
+import { ConexaoComponent } from './views/core/conexao/conexao.component';
+import { HomeComponent } from './views/core/home/home.component';
 
 export const routes: Routes = [
   {
@@ -12,10 +11,6 @@ export const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent,
-  },
-  {
-    path: 'chat',
-    component: ChatComponent,
   },
   {
     path: 'conexao',

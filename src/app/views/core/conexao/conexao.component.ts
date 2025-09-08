@@ -19,6 +19,8 @@ export class ConexaoComponent implements OnDestroy {
   mensagemSucesso: string | null = null;
   gerarNovoQrCode = false;
   isCreatingInstance = false;
+  status: string | null = null;
+  nameInstance = '5567991431860';
 
   segundosRestantes: number = 0;
   private timerSubscription: Subscription | null = null;
@@ -98,6 +100,31 @@ export class ConexaoComponent implements OnDestroy {
     });
   }
 
+  statusInstance() {
+    var instanceName = this.conectarFormGroup.value.nomeInstancia;
+
+    if (instanceName == null) {
+      if (this.nameInstance != null) {
+        instanceName = this.nameInstance;
+      }
+    }
+
+    console.log('Nome da Instancia: ' + instanceName);
+
+    this.evolutionService.statusInstance(this.nameInstance).subscribe({
+      next: (resultado: any) => {
+        if (resultado.state == 'open') {
+          this.status = resultado.state;
+          this.isCreatingInstance = false;
+          this.gerarNovoQrCode = false;
+        }
+      },
+      error: (error) => {
+        console.log(error);
+      },
+    });
+  }
+
   private resetarEstado() {
     this.qrCodeUrl = null;
     this.mensagemErro = null;
@@ -111,28 +138,26 @@ export class ConexaoComponent implements OnDestroy {
 
     this.cdr.detectChanges();
 
-    // Inicia o timer visível de 30 segundos
     this.startQrCodeTimer(30);
   }
 
   private startQrCodeTimer(segundos: number) {
-    // Cancela qualquer timer existente
     if (this.timerSubscription) {
       this.timerSubscription.unsubscribe();
     }
 
     this.segundosRestantes = segundos;
 
-    // Atualiza a cada segundo
     this.timerSubscription = interval(1000).subscribe(() => {
       this.segundosRestantes--;
 
-      if (this.segundosRestantes <= 0) {
+      if (this.segundosRestantes <= 0 || this.status === 'open') {
         this.qrCodeUrl = null;
         this.gerarNovoQrCode = true;
         this.timerSubscription?.unsubscribe();
       }
 
+      this.statusInstance();
       this.cdr.detectChanges();
     });
   }

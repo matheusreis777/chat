@@ -11,6 +11,9 @@ export class EvolutionService {
 
   private urlNewQrCode = 'https://evolution-n8n.luvtff.easypanel.host/webhook/atualizar-qr-code';
 
+  private urlStatusInstance =
+    'https://evolution-n8n.luvtff.easypanel.host/webhook/c65a67e5-ef1e-41ae-b540-7e33638caffc';
+
   constructor(private http: HttpClient) {}
 
   createInstance(instanceName: string): Observable<Blob> {
@@ -41,5 +44,12 @@ export class EvolutionService {
       headers: headers,
       responseType: 'blob',
     });
+  }
+
+  statusInstance(instanceName: string): Observable<any> {
+    const data = {
+      instanceName: instanceName,
+    };
+    return this.http.post(this.urlStatusInstance, data);
   }
 }

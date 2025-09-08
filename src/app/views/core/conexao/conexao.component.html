@@ -10,30 +10,24 @@
     Somente números. Letras e caracteres especiais não são permitidos.
   </label>
 
-  <div *ngIf="qrCodeUrl" style="text-align: center">
+  @if(stateInstance != '') {
+  <label>Status: {{ stateInstance }}</label>
+  } @if(qrCodeUrl != null || stateInstance == 'open') {
+  <div style="text-align: center">
     <img [src]="qrCodeUrl" />
     <p>QR code expira em {{ segundosRestantes }} segundos</p>
   </div>
+  }
 
   <div class="button-container">
-    <button
-      type="button"
-      *ngIf="qrCodeUrl == null && gerarNovoQrCode == false"
-      (click)="conectar()"
-      [disabled]="!conectarFormGroup.valid || isCreatingInstance"
-    >
-      {{ isCreatingInstance ? 'Criando...' : 'Criar Instância' }}
+    @if(generateNewQrCode == false && stateInstance != 'open') {
+    <button type="button" (click)="conectar()" [disabled]="!conectarFormGroup.valid">
+      {{ 'Criar Instância' }}
     </button>
-
-    <button
-      type="button"
-      *ngIf="!qrCodeUrl && gerarNovoQrCode == true"
-      (click)="newQrCode()"
-      [disabled]="!conectarFormGroup.valid || isCreatingInstance"
-    >
-      {{ isCreatingInstance ? 'Gerando...' : 'Gerar novo QR Code' }}
+    } @if(generateNewQrCode == true) {
+    <button type="button" (click)="newQrCode()" [disabled]="!conectarFormGroup.valid">
+      {{ 'Gerar novo QR Code' }}
     </button>
-
-    <button type="button" (click)="statusInstance()">Verificar Status</button>
+    }
   </div>
 </form>

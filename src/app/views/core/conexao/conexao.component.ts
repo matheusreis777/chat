@@ -16,13 +16,10 @@ export class ConexaoComponent implements OnDestroy {
   conectarFormGroup: FormGroup;
   qrCodeUrl: string | null = null;
   mensagemErro: string | null = null;
-  mensagemSucesso: string | null = null;
-  gerarNovoQrCode = false;
-  isCreatingInstance = false;
-  status: string | null = null;
-  nameInstance = '5567991431860';
+  segundosRestantes = 0;
+  stateInstance: string = '';
+  generateNewQrCode: boolean = false;
 
-  segundosRestantes: number = 0;
   private timerSubscription: Subscription | null = null;
 
   constructor(
@@ -32,11 +29,13 @@ export class ConexaoComponent implements OnDestroy {
     private cdr: ChangeDetectorRef
   ) {
     this.conectarFormGroup = this.fb.group({
-      nomeInstancia: ['', [Validators.required, Validators.pattern('^[0-9]+$')]], // apenas números
+      nomeInstancia: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
     });
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.timerSubscription?.unsubscribe();
+  }
 
   filtrarApenasNumeros(event: any) {
     const input = event.target as HTMLInputElement;
@@ -46,119 +45,86 @@ export class ConexaoComponent implements OnDestroy {
   }
 
   conectar() {
-    if (!this.conectarFormGroup.valid) {
-      this.mensagemErro = 'Nome da instância é obrigatório e deve conter apenas números';
-      return;
-    }
-
-    this.isCreatingInstance = true;
-    this.blockUi.start();
-    this.resetarEstado();
-
-    const instanceName = this.conectarFormGroup.value.nomeInstancia;
-
-    this.evolutionService.createInstance(instanceName).subscribe({
-      next: (blob: Blob) => {
-        this.blockUi.stop();
-        this.isCreatingInstance = false;
-        this.exibirQrCode(blob);
-        this.gerarNovoQrCode = true;
-      },
-      error: (error) => {
-        this.blockUi.stop();
-        this.isCreatingInstance = false;
-        this.mensagemErro = 'Erro ao criar instância. Tente novamente.';
-      },
-    });
+    this.executarAcao(() => this.evolutionService.createInstance(this.instanceName));
   }
 
   newQrCode() {
+    this.executarAcao(() => this.evolutionService.newQrCode(this.instanceName));
+  }
+
+  private executarAcao(acao: () => any) {
     if (!this.conectarFormGroup.valid) {
       this.mensagemErro = 'Nome da instância é obrigatório e deve conter apenas números';
       return;
     }
 
-    this.isCreatingInstance = true;
     this.blockUi.start();
     this.resetarEstado();
 
-    const instanceName = this.conectarFormGroup.value.nomeInstancia;
-
-    this.evolutionService.newQrCode(instanceName).subscribe({
+    acao().subscribe({
       next: (blob: Blob) => {
         this.blockUi.stop();
-        this.isCreatingInstance = false;
         this.exibirQrCode(blob);
-        this.gerarNovoQrCode = true;
       },
-      error: (error: Error) => {
+      error: () => {
         this.blockUi.stop();
-        this.isCreatingInstance = false;
-        this.gerarNovoQrCode = true;
-        this.mensagemErro = 'Erro ao gerar QR Code. Tente novamente.';
+        this.mensagemErro = 'Erro ao processar instância. Tente novamente.';
       },
     });
   }
 
   statusInstance() {
-    var instanceName = this.conectarFormGroup.value.nomeInstancia;
-
-    if (instanceName == null) {
-      if (this.nameInstance != null) {
-        instanceName = this.nameInstance;
-      }
-    }
-
-    console.log('Nome da Instancia: ' + instanceName);
-
-    this.evolutionService.statusInstance(this.nameInstance).subscribe({
+    this.evolutionService.statusInstance(this.instanceName).subscribe({
       next: (resultado: any) => {
-        if (resultado.state == 'open') {
-          this.status = resultado.state;
-          this.isCreatingInstance = false;
-          this.gerarNovoQrCode = false;
+        if (resultado.state === 'open') {
+          this.qrCodeUrl = null;
+          this.stateInstance = resultado.state;
+          this.generateNewQrCode = false;
+          this.stopTimer();
         }
       },
-      error: (error) => {
-        console.log(error);
-      },
+      error: (error) => console.error(error),
     });
+  }
+
+  private get instanceName(): string {
+    return this.conectarFormGroup.value.nomeInstancia;
   }
 
   private resetarEstado() {
     this.qrCodeUrl = null;
     this.mensagemErro = null;
-    this.mensagemSucesso = null;
-    this.gerarNovoQrCode = false;
   }
 
   private exibirQrCode(blob: Blob) {
     const url = URL.createObjectURL(blob);
     this.qrCodeUrl = url;
-
     this.cdr.detectChanges();
-
     this.startQrCodeTimer(30);
   }
 
   private startQrCodeTimer(segundos: number) {
-    if (this.timerSubscription) {
-      this.timerSubscription.unsubscribe();
-    }
-
+    this.stopTimer();
     this.segundosRestantes = segundos;
 
-    this.timerSubscription = interval(1000).subscribe(() => {
+    this.timerSubscription = interval(1000).subscribe((i) => {
       this.segundosRestantes--;
 
-      if (this.segundosRestantes <= 0 || this.status === 'open') {
-        this.qrCodeUrl = null;
-        this.gerarNovoQrCode = true;
-        this.timerSubscription?.unsubscribe();
+      if (this.segundosRestantes % 5 === 0) {
+        this.statusInstance();
       }
 
-      this.statusInstance();
+      if (this.segundosRestantes <= 0 && this.stateInstance == 'open') {
+        this.qrCodeUrl = null;
+        this.stopTimer();
+      }
+
       this.cdr.detectChanges();
     });
+  }
+
+  private stopTimer() {
+    this.timerSubscription?.unsubscribe();
+    this.timerSubscription = null;
   }
 }

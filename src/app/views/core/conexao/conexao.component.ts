@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectorRef, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BlockUiService } from '../../../shared/services/block-ui.service';
 import { EvolutionService } from '../../../shared/services/evolution.service';
@@ -12,13 +12,15 @@ import { interval, Subscription } from 'rxjs';
   templateUrl: './conexao.component.html',
   styleUrls: ['./conexao.component.scss'],
 })
-export class ConexaoComponent implements OnDestroy {
+export class ConexaoComponent implements OnDestroy, OnInit {
   conectarFormGroup: FormGroup;
   qrCodeUrl: string | null = null;
   mensagemErro: string | null = null;
   segundosRestantes = 0;
   stateInstance: string = '';
   generateNewQrCode: boolean = false;
+  instanciaGerada: boolean = false;
+  conectado: boolean = false;
 
   private timerSubscription: Subscription | null = null;
 
@@ -31,6 +33,10 @@ export class ConexaoComponent implements OnDestroy {
     this.conectarFormGroup = this.fb.group({
       nomeInstancia: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
     });
+  }
+
+  ngOnInit(): void {
+    this.ngOnDestroy();
   }
 
   ngOnDestroy(): void {
@@ -65,9 +71,11 @@ export class ConexaoComponent implements OnDestroy {
       next: (blob: Blob) => {
         this.blockUi.stop();
         this.exibirQrCode(blob);
+        this.instanciaGerada = true;
       },
       error: () => {
         this.blockUi.stop();
+        this.instanciaGerada = false;
         this.mensagemErro = 'Erro ao processar instância. Tente novamente.';
       },
     });
@@ -77,10 +85,19 @@ export class ConexaoComponent implements OnDestroy {
     this.evolutionService.statusInstance(this.instanceName).subscribe({
       next: (resultado: any) => {
         if (resultado.state === 'open') {
-          this.qrCodeUrl = null;
+          this.qrCodeUrl = '';
           this.stateInstance = resultado.state;
           this.generateNewQrCode = false;
+
           this.stopTimer();
+
+          // Ativa blockUi e só depois de 5 segundos mostra o "conectado"
+          this.blockUi.start();
+          setTimeout(() => {
+            this.conectado = true;
+            this.blockUi.stop();
+            this.cdr.detectChanges();
+          }, 5000);
         }
       },
       error: (error) => console.error(error),
@@ -107,14 +124,14 @@ export class ConexaoComponent implements OnDestroy {
     this.stopTimer();
     this.segundosRestantes = segundos;
 
-    this.timerSubscription = interval(1000).subscribe((i) => {
+    this.timerSubscription = interval(1000).subscribe(() => {
       this.segundosRestantes--;
 
       if (this.segundosRestantes % 5 === 0) {
         this.statusInstance();
       }
 
-      if (this.segundosRestantes <= 0 || this.stateInstance == 'open') {
+      if (this.segundosRestantes <= 0) {
         this.qrCodeUrl = null;
         this.stopTimer();
       }

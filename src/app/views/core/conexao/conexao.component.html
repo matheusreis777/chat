@@ -1,3 +1,4 @@
+@if(!conectado){
 <form [formGroup]="conectarFormGroup">
   <label>Nome da Instância</label>
   <input
@@ -9,25 +10,45 @@
   <label class="information-small">
     Somente números. Letras e caracteres especiais não são permitidos.
   </label>
-
-  @if (stateInstance != '') {
+  @if(stateInstance != '') {
   <label>Status: {{ stateInstance }}</label>
-  } @if (qrCodeUrl != null || stateInstance != 'open') {
+  } @if(qrCodeUrl != '') {
   <div style="text-align: center">
     <img [src]="qrCodeUrl" />
     <p>QR code expira em {{ segundosRestantes }} segundos</p>
   </div>
   }
-
   <div class="button-container">
-    @if (generateNewQrCode == false || stateInstance != 'open') {
+    @if(!instanciaGerada){
     <button type="button" (click)="conectar()" [disabled]="!conectarFormGroup.valid">
       {{ 'Criar Instância' }}
     </button>
-    } @if (generateNewQrCode == true) {
+    } @if(qrCodeUrl == '' && instanciaGerada){
     <button type="button" (click)="newQrCode()" [disabled]="!conectarFormGroup.valid">
       {{ 'Gerar novo QR Code' }}
     </button>
     }
   </div>
 </form>
+} @if(conectado){
+<div class="success-card">
+  <div class="check-wrap" role="img" aria-label="Conectado com sucesso">
+    <svg viewBox="0 0 120 120" class="checkmark">
+      <circle class="checkmark-circle" cx="60" cy="60" r="54" />
+      <path class="checkmark-check" d="M34 62 L52 78 L86 42" />
+    </svg>
+  </div>
+
+  <h1 class="title">Conectado com sucesso!</h1>
+  <p class="subtitle">
+    Sua instância foi autenticada e está pronta para uso. @if(stateInstance){<span class="badge"
+      >Status: {{ stateInstance }}</span
+    >}
+  </p>
+
+  <div class="actions">
+    <button type="button" class="btn primary">Ir para o painel</button>
+    <button type="button" class="btn ghost">Ver detalhes</button>
+  </div>
+</div>
+}

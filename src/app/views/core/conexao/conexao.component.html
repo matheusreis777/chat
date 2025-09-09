@@ -10,9 +10,9 @@
     Somente números. Letras e caracteres especiais não são permitidos.
   </label>
 
-  @if(stateInstance != '') {
+  @if (stateInstance != '') {
   <label>Status: {{ stateInstance }}</label>
-  } @if(qrCodeUrl != null || stateInstance == 'open') {
+  } @if (qrCodeUrl != null || stateInstance != 'open') {
   <div style="text-align: center">
     <img [src]="qrCodeUrl" />
     <p>QR code expira em {{ segundosRestantes }} segundos</p>
@@ -20,11 +20,11 @@
   }
 
   <div class="button-container">
-    @if(generateNewQrCode == false && stateInstance != 'open') {
+    @if (generateNewQrCode == false || stateInstance != 'open') {
     <button type="button" (click)="conectar()" [disabled]="!conectarFormGroup.valid">
       {{ 'Criar Instância' }}
     </button>
-    } @if(generateNewQrCode == true) {
+    } @if (generateNewQrCode == true) {
     <button type="button" (click)="newQrCode()" [disabled]="!conectarFormGroup.valid">
       {{ 'Gerar novo QR Code' }}
     </button>

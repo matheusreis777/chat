@@ -114,7 +114,7 @@ export class ConexaoComponent implements OnDestroy {
         this.statusInstance();
       }
 
-      if (this.segundosRestantes <= 0 && this.stateInstance == 'open') {
+      if (this.segundosRestantes <= 0 || this.stateInstance == 'open') {
         this.qrCodeUrl = null;
         this.stopTimer();
       }

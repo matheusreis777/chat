@@ -21,6 +21,7 @@ export class ConexaoComponent implements OnDestroy, OnInit {
   generateNewQrCode: boolean = false;
   instanciaGerada: boolean = false;
   conectado: boolean = false;
+  numeroTelefone = '111111111111111111';
 
   private timerSubscription: Subscription | null = null;
 
@@ -37,6 +38,7 @@ export class ConexaoComponent implements OnDestroy, OnInit {
 
   ngOnInit(): void {
     this.ngOnDestroy();
+    this.statusInstance(this.numeroTelefone);
   }
 
   ngOnDestroy(): void {
@@ -81,23 +83,28 @@ export class ConexaoComponent implements OnDestroy, OnInit {
     });
   }
 
-  statusInstance() {
-    this.evolutionService.statusInstance(this.instanceName).subscribe({
+  statusInstance(numeroTelefone?: string) {
+    var instanceName = this.instanceName;
+
+    if (!instanceName) {
+      instanceName = numeroTelefone ?? '';
+    }
+
+    this.evolutionService.statusInstance(instanceName).subscribe({
       next: (resultado: any) => {
         if (resultado.state === 'open') {
           this.qrCodeUrl = '';
           this.stateInstance = resultado.state;
           this.generateNewQrCode = false;
 
-          this.stopTimer();
-
-          // Ativa blockUi e só depois de 5 segundos mostra o "conectado"
           this.blockUi.start();
           setTimeout(() => {
             this.conectado = true;
             this.blockUi.stop();
             this.cdr.detectChanges();
           }, 5000);
+
+          this.stopTimer();
         }
       },
       error: (error) => console.error(error),

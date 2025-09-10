@@ -12,7 +12,7 @@
   </label>
   @if(stateInstance != '') {
   <label>Status: {{ stateInstance }}</label>
-  } @if(qrCodeUrl != '') {
+  } @if(qrCodeUrl) {
   <div style="text-align: center">
     <img [src]="qrCodeUrl" />
     <p>QR code expira em {{ segundosRestantes }} segundos</p>
@@ -42,7 +42,7 @@
   <h1 class="title">Conectado com sucesso!</h1>
   <p class="subtitle">
     Sua instância foi autenticada e está pronta para uso. @if(stateInstance){<span class="badge"
-      >Status: {{ stateInstance }}</span
+      >Status: Conectado</span
     >}
   </p>
 
